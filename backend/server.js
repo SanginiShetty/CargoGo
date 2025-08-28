@@ -16,6 +16,9 @@ const authRoutes = require('./routes/auth');
 const bookingRoutes = require('./routes/booking');
 const pricingRoutes = require('./routes/pricing');
 const trackingRoutes = require('./routes/tracking');
+const adminRoutes = require('./routes/admin');
+const scheduler = require('./services/scheduler');
+scheduler.init();
 
 // Initialize express app
 const app = express();
@@ -52,6 +55,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
 app.use('/api/v1/pricing', pricingRoutes);
 app.use('/api/v1/tracking', trackingRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {
@@ -122,4 +126,21 @@ const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Error handling middleware (should be at the end)
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong!'
+  });
+});
+
+// Handle 404 errors
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
 });
